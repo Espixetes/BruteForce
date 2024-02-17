@@ -12,6 +12,6 @@ int main(size_t argc, char* argv[])
         Sleep(3000);
         return 0;
     }
-    bruteforce::Bruteforce h;
+    bruteforce::BruteForceEngine h;
     h.Start(commandLineArgument[1]);
 }

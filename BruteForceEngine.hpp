@@ -12,10 +12,10 @@
 
 namespace bruteforce
 {
-    class Bruteforce
+    class BruteForceEngine
     {
     public:
-        void Start(std::string encryptedFile);
+        void Start(const std::string& encryptedFile);
     private:
         void BruteForce(int start, int end);
         int AmountPassword();

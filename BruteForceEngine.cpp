@@ -1,6 +1,6 @@
 #include "BruteForceEngine.hpp"
 
-void bruteforce::Bruteforce::Start(std::string encryptedFile)   //Calculate number of passwords for each thread , create thread
+void bruteforce::BruteForceEngine::Start(const std::string& encryptedFile)   //Calculate number of passwords for each thread , create thread
 {
     m_setting.SetEncryptedFilePath(encryptedFile);
     m_encryptedFile = m_setting.GetEncryptedFilePath();
@@ -10,9 +10,9 @@ void bruteforce::Bruteforce::Start(std::string encryptedFile)   //Calculate numb
     ReadFile(m_encryptedFile, m_encryptedText);
     CutHash(m_encryptedText, m_correctHash);
     m_correctHash.resize(SHA256_DIGEST_LENGTH);
-
+    int amountCPU = m_setting.GetAmountCPU();
     std::vector<std::jthread> threads;
-    int step = std::ceil(static_cast<double>(AmountPassword()) / m_setting.GetAmountCPU());
+    int step = std::ceil(static_cast<double>(AmountPassword()) / amountCPU);
     int start = 0;
     int end = 0;
     for (int i = 0; i < m_setting.GetAmountCPU(); ++i)
@@ -24,7 +24,7 @@ void bruteforce::Bruteforce::Start(std::string encryptedFile)   //Calculate numb
             end = AmountPassword();
         }
 
-        threads.push_back(std::jthread(&Bruteforce::BruteForce, this, start, end));
+        threads.push_back(std::jthread(&BruteForceEngine::BruteForce, this, start, end));
     }
     for (auto& thread : threads)
     {
@@ -37,13 +37,13 @@ void bruteforce::Bruteforce::Start(std::string encryptedFile)   //Calculate numb
         std::cout << "Password: " << m_password << std::endl;
     }
     else
-        std::cout << "Password not found" << std::endl;
     {
+        std::cout << "Password not found" << std::endl;
     }
 }
 
 
-std::vector<std::string> bruteforce::Bruteforce::PassPack(int start, int end)
+std::vector<std::string> bruteforce::BruteForceEngine::PassPack(int start, int end) //Generete and return password pack
 {
     std::vector<std::string> pack{};
     for (uint64_t i = start; i < end; ++i)
@@ -62,7 +62,7 @@ std::vector<std::string> bruteforce::Bruteforce::PassPack(int start, int end)
 }
 
 
-void bruteforce::Bruteforce::BruteForce(int start, int end)    //Generate passwords causes passwords to be written and decrypts the file
+void bruteforce::BruteForceEngine::BruteForce(int start, int end)    //Generate passwords causes passwords to be written and decrypts the file
 {
     try
     {
@@ -116,7 +116,7 @@ void bruteforce::Bruteforce::BruteForce(int start, int end)    //Generate passwo
 }
 
 
-int bruteforce::Bruteforce::AmountPassword()   // Calculate all possible password
+int bruteforce::BruteForceEngine::AmountPassword()   // Calculate all possible password
 {
     int amountPassword = 0;
     for (int i = m_length; i > 0; --i)
@@ -126,7 +126,7 @@ int bruteforce::Bruteforce::AmountPassword()   // Calculate all possible passwor
     return amountPassword;
 }
 
-std::string bruteforce::Bruteforce::GeneratePassword(uint64_t index)   //Generete Password from  the transmitted sequence numbers
+std::string bruteforce::BruteForceEngine::GeneratePassword(uint64_t index)   //Generete Password from  the transmitted sequence numbers
 {
     int length{};
     uint64_t counter{};
@@ -162,7 +162,7 @@ std::string bruteforce::Bruteforce::GeneratePassword(uint64_t index)   //Generet
 }
 
 
-void bruteforce::Bruteforce::Decrypt() //Sets the password and decrypts
+void bruteforce::BruteForceEngine::Decrypt() //Sets the password and decrypts
 {
     std::vector<unsigned char> key(EVP_MAX_KEY_LENGTH);
     std::vector<unsigned char> iv(EVP_MAX_IV_LENGTH);
